@@ -106,7 +106,8 @@ export class WebDavImageLoader {
 
 		// fetch the image with username and password
 		const { username, password } = this.plugin.settings;
-		const token = getToken(username, password);
+		let passwordDecoded = atob(String(password));
+		const token = getToken(username, passwordDecoded);
 		const resp = await requestUrl({
 			url: url,
 			method: "GET",

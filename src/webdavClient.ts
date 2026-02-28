@@ -75,11 +75,26 @@ export class WebDavClient {
 	}
 
 	getUrl(path: string) {
-		return encodeURI(this.plugin.settings.url + path);
+		let queryStr = "";
+		let token = String(this.plugin.settings.token);
+		if (token?.length > 0) {
+		  token = atob(token);
+		  queryStr = `?token=${token}`;
+		}
+		return encodeURI(this.plugin.settings.url + path + queryStr);
 	}
 
 	getPath(url: string) {
-		return decodeURI(url.replace(this.plugin.settings.url, ""));
+		let path = url.replace(this.plugin.settings.url, "");
+		let queryStr = "";
+		let token = String(this.plugin.settings.token);
+		if (token?.length > 0) {
+		  token = atob(token);
+		  queryStr = `?token=${token}`;
+		}
+		path = path.replace(queryStr, "");
+		return path;
+		//return decodeURI(url.replace(this.plugin.settings.url, ""));
 	}
 }
 
@@ -99,7 +114,8 @@ class WebDavClientInner {
 		this.baseUrl = url.endsWith("/") ? url.slice(0, -1) : url;
 
 		if (username && password) {
-			const credentials = getToken(username, password);
+			let passwordDecoded = atob(String(password));
+			const credentials = getToken(username, passwordDecoded);
 			this.authHeader = `Basic ${credentials}`;
 		} else {
 			this.authHeader = "";
@@ -194,7 +210,6 @@ class WebDavClientInner {
 	async deleteFile(path: string) {
 		const encodedPath = this.encodePath(path);
 		const url = this.buildUrl(encodedPath);
-
 		const response = await this.request({
 			url,
 			method: "DELETE",

@@ -15,6 +15,7 @@ export interface WebDavImageUploaderSettings {
 	url: string;
 	username?: string;
 	password?: string;
+	token?: string;
 	disableBasicAuth?: boolean;
 
 	// Upload
@@ -32,6 +33,7 @@ export const DEFAULT_SETTINGS: WebDavImageUploaderSettings = {
 	url: "",
 	username: "",
 	password: "",
+	token: "",
 	disableBasicAuth: false,
 
 	enableUpload: true,
@@ -109,7 +111,20 @@ export class WebDavImageUploaderSettingTab extends PluginSettingTab {
 				text.inputEl.type = "password";
 				text.setValue(this.plugin.settings.password ?? "").onChange(
 					(value) => {
-						this.plugin.settings.password = value;
+						this.plugin.settings.password = btoa(value);
+						this.saveSettings();
+					}
+				);
+			});
+
+		new Setting(containerEl)
+			.setName("Token")
+			.setDesc("The token for WebDAV authentication.")
+			.addText((text) => {
+				text.inputEl.type = "password";
+				text.setValue(this.plugin.settings.token ?? "").onChange(
+					(value) => {
+						this.plugin.settings.token = btoa(value);
 						this.saveSettings();
 					}
 				);
